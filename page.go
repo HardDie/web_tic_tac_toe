@@ -30,6 +30,30 @@ td:hover {
 	user-select: none;           /* Non-prefixed version, currently
 	                                supported by Chrome, Opera and Firefox */
 }
+.button {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
+	background-color:#f9f9f9;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#666666;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+}
+.button:hover {
+	background:linear-gradient(to bottom, #e9e9e9 5%, #f9f9f9 100%);
+	background-color:#e9e9e9;
+}
+.button:active {
+	position:relative;
+	top:1px;
+}
 `
 
 var pageIndexTmpl = `
@@ -52,6 +76,8 @@ var pageIndexTmpl = `
 		{{end}}
 	</table>
 
+	<input type="button" value="Restart" class="button" name="resetButton">
+
 	<script type="text/javascript" src="script.js"></script>
 </body>
 </html>
@@ -59,6 +85,9 @@ var pageIndexTmpl = `
 
 var pageScript = `
 (function() {
+	/**
+	 * Help send http request to server
+	 */
 	class Http {
 		static Post(path, body, callback) {
 			const xhr = new XMLHttpRequest();
@@ -80,6 +109,9 @@ var pageScript = `
 		}
 	}
 
+	/**
+	 * Process response from server and fill cells
+	 */
 	function responseHandler(error, response) {
 		response.forEach(function(elem) {
 			cells = document.getElementsByName(elem.Line + "_" + elem.Row);
@@ -89,7 +121,10 @@ var pageScript = `
 
 
 	class Game {
-		static registerHandler(callback) {
+		/**
+		 * Register event handler on field buttons
+		 */
+		static registerFieldHandler(callback) {
 			const nodeCells = document.getElementsByClassName("cell");
 			const arrayCells = Array.from(nodeCells);
 			arrayCells.forEach(function(elem) {
@@ -97,14 +132,39 @@ var pageScript = `
 			});
 		}
 
-		static eventHandler() {
+		/**
+		 * Register event handler on reset buttons
+		 */
+		static registerResetHandler(callback) {
+			const nodeButtons = document.getElementsByClassName("button");
+			const arrayButtons = Array.from(nodeButtons);
+			arrayButtons.forEach(function(elem) {
+				elem.addEventListener('click', callback, false);
+			});
+		}
+
+		/**
+		 * Handler field button
+		 */
+		static eventFieldHandler() {
 			const Name = this.getAttribute('name');
-			const body = {Name}
+			const Type = "Set"
+			const body = {Type, Name}
+			Http.Post("/api", body, responseHandler);
+		}
+
+		/**
+		 * Handler reset button
+		 */
+		static eventResetHandler() {
+			const Type = "Reset"
+			const body = {Type}
 			Http.Post("/api", body, responseHandler);
 		}
 	}
 
-	Game.registerHandler(Game.eventHandler);
+	Game.registerFieldHandler(Game.eventFieldHandler);
+	Game.registerResetHandler(Game.eventResetHandler);
 
 	window.Game = Game
 }());

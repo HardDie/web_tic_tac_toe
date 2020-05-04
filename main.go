@@ -7,28 +7,23 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/http/httputil"
 )
-
-func dumpResponse(resp *http.Response) {
-	dump, err := httputil.DumpResponse(resp, true)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Response packet:")
-	fmt.Println(string(dump))
-	fmt.Println("END")
-}
 
 type mytest struct {
 	Array [][]string
 }
 
 type request struct {
+	Type string
 	Name string
 	line int
 	row  int
+}
+
+type response struct {
+	Line  int
+	Row   int
+	Value string
 }
 
 func parseRequest(r io.Reader) (*request, error) {
@@ -39,7 +34,6 @@ func parseRequest(r io.Reader) (*request, error) {
 		return nil, err
 	}
 	fmt.Sscanf(req.Name, "%d_%d", &req.line, &req.row)
-	fmt.Println(req.line, req.row)
 	return &req, nil
 }
 
@@ -75,28 +69,37 @@ func main() {
 
 		data, err := parseRequest(r.Body)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
-		if value.Array[data.line][data.row] == " " {
-			value.Array[data.line][data.row] = currentPlayer
-			switch currentPlayer {
-			case "X":
-				currentPlayer = "O"
-			case "O":
-				currentPlayer = "X"
+		resp := []response{}
+
+		switch data.Type {
+		case "Set":
+			if value.Array[data.line][data.row] == " " {
+				value.Array[data.line][data.row] = currentPlayer
+				switch currentPlayer {
+				case "X":
+					currentPlayer = "O"
+				case "O":
+					currentPlayer = "X"
+				}
 			}
+
+			resp = append(resp, response{data.line, data.row, currentPlayer})
+
+		case "Reset":
+			for line, line_s := range value.Array {
+				for row, _ := range line_s {
+					value.Array[line][row] = " "
+					resp = append(resp, response{line, row, " "})
+				}
+			}
+			fmt.Println("Reset type!")
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		response := []interface{} {
-			map[string]interface{} {
-				"Line": data.line,
-				"Row": data.row,
-				"Value": value.Array[data.line][data.row],
-			},
-		}
-		responseJson, err := json.Marshal(response)
+		responseJson, err := json.Marshal(resp)
 		fmt.Println(string(responseJson))
 		w.Write([]byte(responseJson))
 	})
