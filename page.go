@@ -9,6 +9,7 @@ body {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+/* Game cell */
 td {
 	width: 80px;
 	height: 80px;
@@ -17,10 +18,12 @@ td {
 	text-align: center;
 	font-size: 30px;
 }
+/* Active game cell */
 td:hover {
 	background: #e4e4e4;
 	cursor: pointer;
 }
+/* Forbid select cells text */
 .noselect {
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none;   /* Safari */
@@ -30,6 +33,7 @@ td:hover {
 	user-select: none;           /* Non-prefixed version, currently
 	                                supported by Chrome, Opera and Firefox */
 }
+/* Cancel button style */
 .button {
 	box-shadow:inset 0px 1px 0px 0px #ffffff;
 	background:linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
