@@ -71,7 +71,7 @@ var pageIndexTmpl = `
 
 <body>
 	<table class="gameTable">
-		{{range $line, $element := .Array}}
+		{{range $line, $element := .}}
 		<tr class="row">
 			{{range $row, $value := $element}}
 			<td class="cell noselect" name="{{$line}}_{{$row}}">{{$value}}</td>
@@ -116,11 +116,15 @@ var pageScript = `
 	/**
 	 * Process response from server and fill cells
 	 */
-	function responseHandler(error, response) {
-		response.forEach(function(elem) {
-			cells = document.getElementsByName(elem.Line + "_" + elem.Row);
-			cells[0].innerText = elem.Value;
-		});
+	function responseHandler(error, resp) {
+		if (error) {
+			console.error(error)
+			return
+		}
+		if (resp.Status == "Step made") {
+			cells = document.getElementsByName(resp.Step.Line+"_"+resp.Step.Row);
+			cells[0].innerText = resp.Step.Player;
+		}
 	}
 
 
@@ -163,7 +167,13 @@ var pageScript = `
 		static eventResetHandler() {
 			const Type = "Reset"
 			const body = {Type}
-			Http.Post("/api", body, responseHandler);
+			Http.Post("/api", body, function(){});
+
+			const nodeCells = document.getElementsByClassName("cell");
+			const arrayCells = Array.from(nodeCells);
+			arrayCells.forEach(function(elem) {
+				elem.innerText = " ";
+			});
 		}
 	}
 
