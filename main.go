@@ -95,8 +95,10 @@ func main() {
 		case "Reset":
 			for line, line_s := range value.Array {
 				for row, _ := range line_s {
-					value.Array[line][row] = " "
-					resp = append(resp, response{line, row, " "})
+					if value.Array[line][row] != " " {
+						value.Array[line][row] = " "
+						resp = append(resp, response{line, row, " "})
+					}
 				}
 			}
 			fmt.Println("Reset type!")
