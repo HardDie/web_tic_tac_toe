@@ -38,12 +38,16 @@ func parseRequest(r io.Reader) (*request, error) {
 }
 
 func main() {
-	value := mytest{
-		Array: [][]string{
-			[]string{" ", " ", " "},
-			[]string{" ", " ", " "},
-			[]string{" ", " ", " "},
-		},
+	const width = 3
+	const height = 3
+	value := mytest{}
+
+	for line := 0; line < height; line++ {
+		tmp := make([]string, 0)
+		for row := 0; row < width; row++ {
+			tmp = append(tmp, " ")
+		}
+		value.Array = append(value.Array, tmp)
 	}
 
 	currentPlayer := "X"
