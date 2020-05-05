@@ -96,6 +96,12 @@ func main() {
 			respBody.Step.Row = data.row
 			respBody.Step.Player = playerStr
 
+			if flag, _ := gg.CheckWin(); flag {
+				respBody.Status = "Game done"
+				fmt.Println("Game done!")
+				break
+			}
+
 		case "Reset":
 			gg.Draw()
 			gg.Reset()
