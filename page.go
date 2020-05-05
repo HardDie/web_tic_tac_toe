@@ -72,7 +72,7 @@ var pageIndexTmpl = `
 <body>
 	<table class="gameTable">
 		{{range $line, $element := .}}
-		<tr class="row">
+		<tr class="row-{{$line}}">
 			{{range $row, $value := $element}}
 			<td class="cell noselect" name="{{$line}}_{{$row}}">{{$value}}</td>
 			{{end}}
